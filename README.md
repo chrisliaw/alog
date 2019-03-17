@@ -73,7 +73,7 @@ class MyApp
       # If only message is given, the following is the default:
       # 1. The system shall use the first logger, in this case it will be using logger with key :stdout
       # 2. The logger will use debug level to log the message 
-      #    (System will use debug as well if the type: key is not given in the l() above.
+      #    (System will use log level debug if the log level is not given in the l() above via key 'type'.
       clog "This is logging message"
       ...
       ...
