@@ -10,8 +10,8 @@ Gem::Specification.new do |spec|
   spec.email         = ["chrisliaw@antrapol.com"]
 
   spec.summary       = %q{Conditional logging to provide contextual logging and ability to reconfigure log message visibility during runtime}
-  spec.description   = %q{}
-  spec.homepage      = ""
+  spec.description   = %q{Allow contextual log output to ease developer in log management}
+  spec.homepage      = "https://github.com/chrisliaw/alog"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
