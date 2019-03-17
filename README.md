@@ -38,92 +38,91 @@ Any tag that is not configured will be skipped
 
 ```ruby
 class MyApp
-	include Alog
-	
-	# STEP 1: Configuration
-	#
-	# Configure logger and bind the logger to a key
-	# Whatever on the right side shall be passed to the Logger object
-	# The array construct is necesary because *args is used in 
-	# passing the parameters to actual Logger object via new()
-	Alog::LogFacts[:stdout] = [STDOUT]	
-	# Also multiple loggers can be configured by creating multiple keys
-	Alog::LogFacts[:app_file] = ['app.log',10, 1024000]
-	...
-	
-	# STEP 2: Define which keys to activate
-	# Any block tagged by the key included in this array shall be printed
-	# Alog::LogTag is a global array
-	Alog::LogTag << :feature_1
-	Alog::LogTag << :feature_2
-	...
-	# Any tag that is not configured inside the Alog::LogTag will not be printed out
-	# If the list is empty, no log under the library shall be printed.
-	# Or there is more then dozens tags and want to show all, use this method
-	show_all_tags
+  include Alog
+  
+  # STEP 1: Configuration
+  #
+  # Configure logger and bind the logger to a key
+  # Whatever on the right side shall be passed to the standard library Logger object
+  # The array construct is necesary because *args is used in 
+  # passing the parameters to actual standard library Logger object via new()
+  LogFacts[:stdout] = [STDOUT]  
+  # Also multiple loggers can be configured by creating multiple keys
+  LogFacts[:app_file] = ['app.log',10, 1024000]
+  ...
+  
+  # STEP 2: Define which keys to activate
+  # Any block/log output tagged by the key included in this array shall be printed
+  LogTag << :feature_1
+  LogTag << :feature_2
+  ...
+  # Any tag that is not configured inside the LogTag will not be printed out
+  # If the list is empty, no log under the library shall be printed.
+  # Or there is more then dozens tags and want to show all, use this method
+  show_all_tags
 
-	
-	# STEP 3: Create the logging
-	def my_method(p1, p2)
-		# Method 1: block logging
-		l(:feature_1, type: :debug, logEng: [:stdout]) do
-			# All clog() call inside this block will be tagged with key :feature_1
-			# enabling the key :feature_1 shall show all log messages inside this block or disabling otherwise
-			...
-			...
-			# If only message is given, the following is the default:
-			# 1. The system shall use the first logger, in this case it will be using logger with key :stdout
-			# 2. The logger will use debug level to log the message 
-			#		 (System will use debug as well if the type: key is not given in the l() above.
-			clog "This is logging message"
-			...
-			...
-			# If the message and tag is given
-			# 1. The tag shall override the global configuration of logging level debug (to whatever level given by developer)
-			# Note that 'error' logging level will ignore the tag-skipping feature since error conditions (and its messages) will likely 
-			# affect the subsequent code/logic of a system. Therefore 'error' will always be printed.
-			clog "Error in defining X", :error
-			clog "Reach here means ok", :info
-			
-			# Asking the Alogger to write to other logger at the same time, 
-			# overriding the parameter given in the l().
-			clog "This will written to both :stdout and :app_file", logEng: [:stdout,:app_file]
-			...
-			...
-		end
-		
-		(business logic continues...)
-		...
-		...
-		# Method 2: Call clog() directly
-		# Param 1 : Log messages
-		# Param 2 : Log level [:debug|:info|:error] (empty = :debug)
-		# Param 3 : Tag of the log message (empty = :global)
-		# Param 4 : Log engine to be used (refers to LogFacts hash entries above) (empty = first LogFacts key)
-		clog("Business continue up to level 2", :debug, :feature_2, [:stdout])
-		...
-		
-	end
+  
+  # STEP 3: Create the logging
+  def my_method(p1, p2)
+    # Method 1: block logging
+    l(:feature_1, type: :debug, logEng: [:stdout]) do
+      # All clog() call inside this block will be tagged with key :feature_1
+      # enabling the key :feature_1 shall show all log messages inside this block or disabling otherwise
+      ...
+      ...
+      # If only message is given, the following is the default:
+      # 1. The system shall use the first logger, in this case it will be using logger with key :stdout
+      # 2. The logger will use debug level to log the message 
+      #    (System will use debug as well if the type: key is not given in the l() above.
+      clog "This is logging message"
+      ...
+      ...
+      # If the message and tag is given
+      # 1. The tag shall override the global configuration of logging level debug (to whatever level given by developer)
+      # Note that 'error' logging level will ignore the tag-skipping feature since error conditions (and its messages) will likely 
+      # affect the subsequent code/logic of a system. Therefore 'error' will always be printed.
+      clog "Error in defining X", :error
+      clog "Reach here means ok", :info
+      
+      # Asking the Alogger to write to other logger at the same time, 
+      # overriding the parameter given in the l().
+      clog "This will written to both :stdout and :app_file", logEng: [:stdout,:app_file]
+      ...
+      ...
+    end
+    
+    (business logic continues...)
+    ...
+    ...
+    # Method 2: Call clog() directly
+    # Param 1 : Log messages
+    # Param 2 : Log level [:debug|:info|:error] (empty = :debug)
+    # Param 3 : Tag of the log message (empty = :global)
+    # Param 4 : Log engine to be used (refers to LogFacts hash entries above) (empty = first LogFacts key)
+    clog("Business continue up to level 2", :debug, :feature_2, [:stdout])
+    ...
+    
+  end
 
-	def my_method2(p2)
-		# Method 3 : Create the AOlogger object
-		# AOlogger is meant to be proxy for standard Logger, with the tagging and multiple log engines included
-		# The initialize parameter is an array containing key to the LogFacts above...
-		# In the following case, the AOlogger shall only configured to :stdout configuration (refers above)
-		@log = AOlogger.new([:stdout])
-		...
-		...
-		# This behave like standard logging engine
-		@log.debug "Code reached here..."
-		...
-		@log.error "Oppss... We did it again!"
-		...
-		...
-		# This allow application to participate in the conditional logging
-		# If the tag :feature_x is not activated, the message will not be printed.
-		@log.log("this only shown if tag :feature_x is activated", :debug, :feature_x, [:app_file])
-		
-	end
+  def my_method2(p2)
+    # Method 3 : Create the AOlogger object
+    # AOlogger is meant to be proxy for standard Logger, with the tagging and multiple log engines included
+    # The initialize parameter is an array containing key to the LogFacts above...
+    # In the following case, the AOlogger shall only configured to :stdout configuration (refers above)
+    @log = AOlogger.new([:stdout])
+    ...
+    ...
+    # This behave like standard logging engine
+    @log.debug "Code reached here..."
+    ...
+    @log.error "Oppss... We did it again!"
+    ...
+    ...
+    # This allow application to participate in the conditional logging
+    # If the tag :feature_x is not activated, the message will not be printed.
+    @log.log("this only shown if tag :feature_x is activated", :debug, :feature_x, [:app_file])
+    
+  end
 
 end
 ```
