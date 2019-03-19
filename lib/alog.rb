@@ -112,7 +112,7 @@ module Alog
   # 
   def clog(msg, ltype = :debug, key = :global, logEng = [])
     log(msg, { type: @lType != ltype ? ltype : @lType, 
-               key: (key == @lKey ? key : @lKey),
+               key: (key != @lKey ? key : @lKey),
                logEng: @llEng  })
   end
   #
