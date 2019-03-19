@@ -41,20 +41,21 @@ module Alog
   #
   class AOlogger
     attr_reader :logEng
-    def initialize(logEng = [])
+    def initialize(key = :global, logEng = [])
       @myMethods = [:debug, :error, :warn, :warning]
+      @defKey = key
       @logEng = logEng || []
     end
 
     def log(msg, ltype = :debug, key = :global, logEng = [])
-      CondLog.call(msg, { key: key, type: ltype, logEng: logEng || @logEng })
+      CondLog.call(msg, { key: key || @defKey, type: ltype, logEng: logEng || @logEng })
     end
 
     def method_missing(mtd, *args, &block)
       if @myMethods.include?(mtd)
         params = {}
         pa = args[1]
-        params[:key] = :global
+        params[:key] = @defKey
         params[:logEng] = @logEng
         # TODO cases here may not be extensive to 
         # the original Logger supported.

@@ -108,18 +108,17 @@ class MyApp
     # Method 3 : Create the AOlogger object
     # AOlogger is meant to be proxy for standard Logger, with the tagging and multiple log engines included
     # The initialize parameter is an array containing key to the LogFacts above...
-    # In the following case, the AOlogger shall only configured to :stdout configuration (refers above)
-    @log = AOlogger.new([:stdout])
+    # In the following case, the AOlogger shall only configured to :stdout configuration (refers above) 
+    # and all logging shall be tagged with key :feature_m
+    @log = AOlogger.new(:feature_m, [:stdout])
     ...
     ...
     # This behave like standard logging engine
     @log.debug "Code reached here..."
-    ...
     @log.error "Oppss... We did it again!"
     ...
     ...
-    # This allow application to participate in the conditional logging
-    # If the tag :feature_x is not activated, the message will not be printed.
+    # this API is more explicit and replace all global values
     @log.log("this only shown if tag :feature_x is activated", :debug, :feature_x, [:app_file])
     
   end
