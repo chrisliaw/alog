@@ -107,7 +107,7 @@ module Alog
   end
 
   def clog_context
-    STDOUT.puts "Key : #{@lKey}, type: #{@lType}, engine: #{@llEng}"
+    { key: @lKey, type: @lType, engine: @llEng }
   end
 
   #
