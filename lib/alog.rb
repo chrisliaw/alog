@@ -106,6 +106,10 @@ module Alog
     b.call(key, params, &block)
   end
 
+  def clog_context
+    STDOUT.puts "Key : #{@lKey}, type: #{@lType}, engine: #{@llEng}"
+  end
+
   #
   # Module level clog() method
   # Meant to be called by application INSIDE the l()'s block
