@@ -50,6 +50,8 @@ class MyApp
   # Also multiple loggers can be configured by creating multiple keys
   LogFacts[:app_file] = ['app.log',10, 1024000]
   ...
+  # Or use the following method to add the log fact, which will check th existing key before adding
+  add_log_fact(:sys_file, ['sys.log', 10, 1024000])
   
   # STEP 2: Define which keys to activate
   # Any block/log output tagged by the key included in this array shall be printed
@@ -107,15 +109,22 @@ class MyApp
   def my_method2(p2)
     # Method 3 : Create the AOlogger object
     # AOlogger is meant to be proxy for standard Logger, with the tagging and multiple log engines included
-    # The initialize parameter is an array containing key to the LogFacts above...
+    # The initialize parameter is an hash containing keys to configure the tagging and multi logging
+    #
     # In the following case, the AOlogger shall only configured to :stdout configuration (refers above) 
-    # and all logging shall be tagged with key :feature_m
-    @log = AOlogger.new(:feature_m, [:stdout])
+    # and all logging shall be tagged with key :feature_m and active_tag is :global and :feature_m
+    # UNFORTUNATELY THIS WILL BREAK RELEASE VERSION < v0.6
+    @log = AOlogger.new({ key: :feature_m, logEng: [:stdout], active_tag: [:global, :feature_m] })
     ...
     ...
     # This behave like standard logging engine
     @log.debug "Code reached here..."
     @log.error "Oppss... We did it again!"
+    ...
+    @log.deactivate_tag(:global)   # disable :global tag from this point onwards
+    ...
+    ...
+    @log.activate_tag(:global)      # enable :global tag from this point onwards
     ...
     ...
     # this API is more explicit and replace all global values

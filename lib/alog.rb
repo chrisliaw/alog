@@ -16,6 +16,14 @@ module Alog
   # LogFacts entry given by application
   GLog = {}
 
+  def add_log_fact(key, conf)
+    # add new log fact to global if not defined
+    if LogFacts.include?(key)
+    else
+      LogFacts[key] = conf
+    end
+  end
+
   # 
   # class Alogger
   # Inherited from standard library Logger
@@ -41,14 +49,36 @@ module Alog
   #
   class AOlogger
     attr_reader :logEng
-    def initialize(key = :global, logEng = [])
-      @myMethods = [:debug, :error, :warn, :warning]
-      @defKey = key
-      @logEng = logEng || []
+    # Major change on v1.0
+    #def initialize(key = :global, logEng = [], active_tag = LogTag)
+    def initialize(params = { key: :global, logEng: [], active_tag: LogTag } )
+      @myMethods = [:debug, :error, :warn, :warning, :info]
+      @defKey = params[:key]
+      @logEng = params[:logEng] || []
+      @activeTag = params[:active_tag] || []
     end
 
-    def log(msg, ltype = :debug, key = :global, logEng = [])
-      CondLog.call(msg, { key: key || @defKey, type: ltype, logEng: logEng || @logEng })
+    def log(msg, ltype = :debug, key = :global, logEng = [], active_tag = [])
+      CondLog.call(msg, { key: (key == :global ? key : @defKey), type: ltype, logEng: (logEng == [] ? @logEng : logEng), active_tag: (active_tag == [] ? @active_tag : active_tag) })
+    end
+
+    def activate_tag(tag, &block)
+      @activeTag << tag
+      block.call if block
+      @activeTag.delete(tag)
+    end
+
+    def deactivate_tag(tag)
+      @activeTag.delete(tag)
+    end
+
+    def ext_error(ex)
+      if ex.is_a?(Exception)
+        error(ex.message)
+        error(ex.backtrace.join("\n"))
+      else
+        error(ex)
+      end
     end
 
     def method_missing(mtd, *args, &block)
@@ -57,6 +87,7 @@ module Alog
         pa = args[1]
         params[:key] = @defKey
         params[:logEng] = @logEng
+        params[:active_tag] = @activeTag
         # TODO cases here may not be extensive to 
         # the original Logger supported.
         case mtd
@@ -68,6 +99,9 @@ module Alog
           CondLog.call(args[0], params, &block)
         when :warn, :warning
           params[:type] = :warn
+          CondLog.call(args[0], params, &block)
+        when :info
+          params[:type] = :info
           CondLog.call(args[0], params, &block)
         end
         
@@ -129,7 +163,9 @@ module Alog
   CondLog = Proc.new do |msg, params = {}, &block|
     key = params[:key] || :global
     type = params[:type] || :debug
-    if defined?(:LogTag) and LogTag.is_a?(Array) and (LogTag.include?(key) or LogTag.include?(:all)) or type == :error
+    activeTag = params[:active_tag] || LogTag
+    #if defined?(:LogTag) and LogTag.is_a?(Array) and (LogTag.include?(key) or LogTag.include?(:all)) or type == :error
+    if (activeTag.include?(key) or activeTag.include?(:all)) or type == :error
       logEng = params[:logEng]
       if logEng == nil or (logEng != nil and logEng.empty?)
         logEng = (LogFacts.length > 0 ? [LogFacts.keys[0]] : [:default])
