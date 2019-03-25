@@ -81,6 +81,18 @@ module Alog
       end
     end
 
+    def no_active_tags
+      @active_tag = []
+    end
+
+    def show_all_tags
+      @active_tag << :all
+    end
+
+    def selected_tags_only
+      @active_tag.delete(:all)
+    end
+
     def method_missing(mtd, *args, &block)
       if @myMethods.include?(mtd)
         params = {}
