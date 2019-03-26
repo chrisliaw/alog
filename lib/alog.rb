@@ -59,13 +59,15 @@ module Alog
     end
 
     def log(msg, ltype = :debug, key = :global, logEng = [], active_tag = [])
-      CondLog.call(msg, { key: (key == :global ? key : @defKey), type: ltype, logEng: (logEng == [] ? @logEng : logEng), active_tag: (active_tag == [] ? @active_tag : active_tag) })
+      CondLog.call(msg, { key: (key == :global ? key : @defKey), type: ltype, logEng: (logEng == [] ? @logEng : logEng), active_tag: (active_tag == [] ? @activeTag : active_tag) })
     end
 
     def activate_tag(tag, &block)
       @activeTag << tag
-      block.call if block
-      @activeTag.delete(tag)
+      if block
+        block.call 
+        @activeTag.delete(tag)
+      end
     end
 
     def deactivate_tag(tag)
@@ -82,15 +84,15 @@ module Alog
     end
 
     def no_active_tags
-      @active_tag = []
+      @activeTag = []
     end
 
     def show_all_tags
-      @active_tag << :all
+      @activeTag << :all
     end
 
     def selected_tags_only
-      @active_tag.delete(:all)
+      @activeTag.delete(:all)
     end
 
     def method_missing(mtd, *args, &block)
