@@ -202,8 +202,13 @@ module Alog
           GLog[e] = Alogger.new(lp)
 
         end
-        
-        GLog[e].log("#{caller.length > 3 ? "[#{File.basename(caller[4])}]" : ""} [#{key}] #{msg}", type, &block)
+       
+        4.downto(0).each do |i|
+          c = caller[i]
+          next if c == nil
+          @caller = c
+        end
+        GLog[e].log("#{caller.length > 3 ? "[#{File.basename(@caller)}]" : ""} [#{key}] #{msg}", type, &block)
       end
       
     end
