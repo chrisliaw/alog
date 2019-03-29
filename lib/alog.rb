@@ -203,10 +203,11 @@ module Alog
 
         end
        
-        4.downto(0).each do |i|
+        3.downto(0).each do |i|
           c = caller[i]
           next if c == nil
           @caller = c
+          break
         end
         GLog[e].log("#{caller.length > 3 ? "[#{File.basename(@caller)}]" : ""} [#{key}] #{msg}", type, &block)
       end
