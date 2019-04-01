@@ -203,13 +203,16 @@ module Alog
 
         end
        
-        3.downto(0).each do |i|
-          c = caller[i]
-          next if c == nil
-          @caller = c
-          break
+        caller.each do |c|
+          if c =~ /alog.rb/
+          else
+            @cal = c
+            break
+          end
         end
-        GLog[e].log("#{caller.length > 3 ? "[#{File.basename(@caller)}]" : ""} [#{key}] #{msg}", type, &block)
+
+        #GLog[e].log("#{caller.length > 4 ? "[#{File.basename(caller[4])}]" : ""} [#{key}] #{msg}", type, &block)
+        GLog[e].log("[#{File.basename(@cal)}] [#{key}] #{msg}", type, &block)
       end
       
     end
